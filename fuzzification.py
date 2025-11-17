@@ -97,6 +97,46 @@ def interest_rate_fuzzification(rate):
     }
     return memberships
 
+def house_fuzzification(house):
+    """
+    Fuzzify the house parameter into linguistic categories:
+    'Very low', 'Low', 'Medium', 'High', and 'Very High' using triangular membership functions.
+
+    Parameters:
+    house (float): The value of the house.
+
+    Returns:
+    dict: A dictionary with membership values for each category.
+    """
+    memberships = {
+        'Very_low': triangle_membership(house, 0, 0, 3),
+        'Low': triangle_membership(house, 0, 3, 6),
+        'Medium': triangle_membership(house, 2, 5, 8),
+        'High': triangle_membership(house, 4, 7, 10),
+        'Very_high': triangle_membership(house, 7, 10, 10)
+    }
+    return memberships
+
+def application_fuzzification(application):
+    """
+    Fuzzify the application parameter into linguistic categories:
+    'Low', 'Medium' and 'High' using triangular and trapezoidal membership functions.
+
+    Parameters:
+    application (float): The value of the application.
+
+    Returns:
+    dict: A dictionary with membership values for each category.
+    """
+    memberships = {
+        'Low': trapezoidal_membership(application, 0, 0, 2, 4),
+        'Medium': triangle_membership(application, 2, 5, 8),
+        'High': trapezoidal_membership(application, 6, 8, 10, 10)
+    }
+    return memberships
+    
+   
+
 
 
 # --- TESTING THE FUZZIFICATION FUNCTIONS ---
