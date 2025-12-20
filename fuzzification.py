@@ -42,7 +42,8 @@ def location_of_house_fuzzification(location):
     }
     return memberships
 
-def applicaton_assets_fuzzification(assets):
+
+def application_assets_fuzzification(assets):
     """
     Fuzzify the application assets into linguistic categories:
     'Low', 'Medium', and 'High' using trapezoidal and triangular membership functions.

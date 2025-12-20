@@ -8,7 +8,7 @@ from defuzzification import Defuzzifier
 import fuzzification
 from inference import evaluate_application_rule, evaluate_house_rule, evaluate_loan_rule
 # plotting_mf is not strictly needed for the main logic but useful if we want to show MF plots
-# from plotting_mf import FuzzificationPlotter 
+from plotting_mf import FuzzificationPlotter 
 
 class FuzzyLogicApp:
     def __init__(self, root):
@@ -76,6 +76,9 @@ class FuzzyLogicApp:
         self.plot_credit_var = tk.BooleanVar(value=True)
         ttk.Checkbutton(self.plot_frame, text="Show Credit Defuzzification", variable=self.plot_credit_var).pack(anchor="w")
 
+        self.plot_input_fuzz_var = tk.BooleanVar(value=True)
+        ttk.Checkbutton(self.plot_frame, text="Show Input Fuzzification", variable=self.plot_input_fuzz_var).pack(anchor="w")
+
     def create_input_field(self, parent, row, label_text, var_name, default_val):
         ttk.Label(parent, text=label_text).grid(row=row, column=0, sticky="w", pady=5)
         entry = ttk.Entry(parent)
@@ -95,7 +98,7 @@ class FuzzyLogicApp:
             # 2. Fuzzification
             fuzzified_market_house = fuzzification.market_value_house_fuzzification(market_house)
             fuzzified_location_house = fuzzification.location_of_house_fuzzification(location_house)
-            fuzzified_application_assets = fuzzification.applicaton_assets_fuzzification(application_assets)
+            fuzzified_application_assets = fuzzification.application_assets_fuzzification(application_assets)
             fuzzified_application_salary = fuzzification.application_salary_fuzzification(application_salary)
             fuzzified_interest_rate = fuzzification.interest_rate_fuzzification(interest_rate)
             
@@ -134,14 +137,29 @@ class FuzzyLogicApp:
             # 6. Plotting
             # We use the existing visualize_defuzzification method which calls plt.show()
             # This will open separate windows.
+            
+            if self.plot_input_fuzz_var.get():
+                plotter = FuzzificationPlotter()
+                inputs = {
+                    'market_house': market_house,
+                    'location_house': location_house,
+                    'application_assets': application_assets,
+                    'application_salary': application_salary,
+                    'interest_rate': interest_rate
+                }
+                plotter.plot_all_inputs(inputs)
+
+            # Collect results for defuzzification plotting
+            defuzz_results = {}
             if self.plot_house_var.get():
-                defuzz.visualize_defuzzification(result_evaluation_house, 'house')
-                
+                defuzz_results['house'] = result_evaluation_house
             if self.plot_app_var.get():
-                defuzz.visualize_defuzzification(result_evaluation_application, 'application')
-                
+                defuzz_results['application'] = result_evaluation_application
             if self.plot_credit_var.get():
-                defuzz.visualize_defuzzification(result_loan, 'credit')
+                defuzz_results['credit'] = result_loan
+            
+            if defuzz_results:
+                defuzz.visualize_all_defuzzification(defuzz_results)
                 
         except ValueError as e:
             messagebox.showerror("Input Error", "Please enter valid numeric values.")
