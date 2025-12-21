@@ -4,11 +4,11 @@ from membership_function import trapezoidal_membership, triangle_membership
 
 class Defuzzifier:
     """
-    Farklı çıktı tipleri için defuzzification işlemi yapar.
+    Performs defuzzification for different output types.
     """
     
     def __init__(self):
-        # Her çıktı tipi için membership fonksiyonları ve aralıkları tanımla
+        # Define membership functions and ranges for each output type
         self.output_configs = {
             'credit': {
                 'range': (0, 1000),
@@ -42,106 +42,33 @@ class Defuzzifier:
     
     def centroid_defuzzification(self, fuzzy_output, output_type='credit'):
         """
-        Centroid yöntemi ile bulanık çıktıyı kesin değere çevirir.
+        Converts the fuzzy output to a crisp value using the centroid method.
         
         Args:
             fuzzy_output (dict): {'Very_low': 0.2, 'Low': 0.5, ...}
-            output_type (str): 'credit', 'house', veya 'application'
+            output_type (str): 'credit', 'house', or 'application'
         
         Returns:
-            float: Kesin çıktı değeri
+            float: Crisp output value
         """
         
         if output_type not in self.output_configs:
-            raise ValueError(f"Geçersiz output_type: {output_type}")
+            raise ValueError(f"Invalid output_type: {output_type}")
         
         config = self.output_configs[output_type]
         output_range = config['range']
         membership_functions = config['functions']
         
-        # X ekseni için değerler oluştur
+        # Generate values for the X-axis
         x = np.linspace(output_range[0], output_range[1], 1000)
         
-        # Toplam membership'i başlat
+        # Initialize aggregated membership
         aggregated = np.zeros(len(x))
         
-        # Her kategori için işlem yap
+        # Process each category
         for category, strength in fuzzy_output.items():
             if strength > 0 and category in membership_functions:
-                # Membership değerlerini hesapla
-                membership_values = np.array([membership_functions[category](xi) for xi in x])
-                
-import numpy as np
-from membership_function import trapezoidal_membership, triangle_membership
-
-
-class Defuzzifier:
-    """
-    Farklı çıktı tipleri için defuzzification işlemi yapar.
-    """
-    
-    def __init__(self):
-        # Her çıktı tipi için membership fonksiyonları ve aralıkları tanımla
-        self.output_configs = {
-            'credit': {
-                'range': (0, 1000),
-                'functions': {
-                    'Very_low': lambda val: trapezoidal_membership(val, 0, 0, 100, 200),
-                    'Low': lambda val: triangle_membership(val, 100, 250, 400),
-                    'Medium': lambda val: triangle_membership(val, 300, 500, 700),
-                    'High': lambda val: triangle_membership(val, 600, 750, 900),
-                    'Very_high': lambda val: trapezoidal_membership(val, 800, 900, 1000, 1000)
-                }
-            },
-            'house': {
-                'range': (0, 10),
-                'functions': {
-                    'Very_low': lambda val: trapezoidal_membership(val, 0, 0, 1, 3),
-                    'Low': lambda val: triangle_membership(val, 1, 3, 5),
-                    'Medium': lambda val: triangle_membership(val, 3, 5, 7),
-                    'High': lambda val: triangle_membership(val, 5, 7, 9),
-                    'Very_high': lambda val: trapezoidal_membership(val, 7, 9, 10, 10)
-                }
-            },
-            'application': {
-                'range': (0, 10),
-                'functions': {
-                    'Low': lambda val: trapezoidal_membership(val, 0, 0, 2, 4),
-                    'Medium': lambda val: triangle_membership(val, 2, 5, 8),
-                    'High': lambda val: trapezoidal_membership(val, 6, 8, 10, 10)
-                }
-            }
-        }
-    
-    def centroid_defuzzification(self, fuzzy_output, output_type='credit'):
-        """
-        Centroid yöntemi ile bulanık çıktıyı kesin değere çevirir.
-        
-        Args:
-            fuzzy_output (dict): {'Very_low': 0.2, 'Low': 0.5, ...}
-            output_type (str): 'credit', 'house', veya 'application'
-        
-        Returns:
-            float: Kesin çıktı değeri
-        """
-        
-        if output_type not in self.output_configs:
-            raise ValueError(f"Geçersiz output_type: {output_type}")
-        
-        config = self.output_configs[output_type]
-        output_range = config['range']
-        membership_functions = config['functions']
-        
-        # X ekseni için değerler oluştur
-        x = np.linspace(output_range[0], output_range[1], 1000)
-        
-        # Toplam membership'i başlat
-        aggregated = np.zeros(len(x))
-        
-        # Her kategori için işlem yap
-        for category, strength in fuzzy_output.items():
-            if strength > 0 and category in membership_functions:
-                # Membership değerlerini hesapla
+                # Compute membership values
                 membership_values = np.array([membership_functions[category](xi) for xi in x])
                 
                 # CLIPPING
@@ -150,7 +77,7 @@ class Defuzzifier:
                 # AGGREGATION
                 aggregated = np.maximum(aggregated, clipped)
         
-        # Centroid hesapla
+        # Compute centroid
         numerator = np.sum(x * aggregated)
         denominator = np.sum(aggregated)
         
@@ -162,12 +89,12 @@ class Defuzzifier:
     
     def visualize_defuzzification(self, fuzzy_output, output_type='credit', ax=None):
         """
-        Defuzzification sürecini görselleştirir
+        Visualizes the defuzzification process.
         """
         import matplotlib.pyplot as plt
         
         if output_type not in self.output_configs:
-            raise ValueError(f"Geçersiz output_type: {output_type}")
+            raise ValueError(f"Invalid output_type: {output_type}")
         
         config = self.output_configs[output_type]
         output_range = config['range']
@@ -182,20 +109,20 @@ class Defuzzifier:
         else:
             show_plot = False
         
-        # Renk paleti
+        # Color palette
         colors = {
             'Very_low': 'blue', 'Low': 'cyan', 'Medium': 'green', 
             'High': 'orange', 'Very_high': 'red'
         }
         
-        # 1. Orijinal membership fonksiyonlarını çiz
+        # 1. Plot original membership functions
         for category, func in membership_functions.items():
             membership_vals = [func(xi) for xi in x]
             color = colors.get(category, 'gray')
             ax.plot(x, membership_vals, '--', color=color, 
                     alpha=0.3, label=f'{category} (original)')
         
-        # 2. Clipped membership fonksiyonlarını çiz
+        # 2. Plot clipped membership functions
         aggregated = np.zeros(len(x))
         
         for category, strength in fuzzy_output.items():
@@ -207,16 +134,16 @@ class Defuzzifier:
                                label=f'{category} = {strength:.2f}')
                 aggregated = np.maximum(aggregated, clipped)
         
-        # 3. Aggregate sonucu çiz
+        # 3. Plot aggregated result
         ax.plot(x, aggregated, 'k-', linewidth=2, label='Aggregated Output')
         ax.fill_between(x, aggregated, alpha=0.2, color='black')
         
-        # 4. Centroid'i hesapla ve işaretle
+        # 4. Compute and mark the centroid
         centroid = self.centroid_defuzzification(fuzzy_output, output_type)
         ax.axvline(centroid, color='red', linestyle='--', linewidth=2, 
                     label=f'Centroid = {centroid:.2f}')
         
-        # Başlıklar
+        # Axes labels and title
         if output_type == 'credit':
             xlabel, title = 'Credit Score', 'Credit Evaluation - Defuzzification'
         elif output_type == 'house':
